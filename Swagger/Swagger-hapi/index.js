@@ -5,6 +5,7 @@ const HapiSwagger = require('hapi-swagger');
 const Pack = require('./package');
 const fs = require('fs');
 const util = require('util');
+const Joi = require('@hapi/joi');
 
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
@@ -50,11 +51,11 @@ const writeFile = util.promisify(fs.writeFile);
         method: 'GET',
         path: '/book-list',
         options: {
-          description: 'Get books list',
+          description: 'Get book list',
             notes: 'Returns an array of books',
             tags: ['api'],
             handler: async (request, h) => {
-                const books = await readFile('./books.json', 'utf8');
+                let books = await readFile('./books.json', 'utf8');
                 return h.response(JSON.parse(books));
             }
         }
@@ -68,7 +69,7 @@ const writeFile = util.promisify(fs.writeFile);
             notes: 'Returns an array of books',
             tags: ['api'],
             handler: async (request, h) => {
-                const book = JSON.parse(request.payload);
+                let book = request.payload;
                 let books = await readFile('./books.json', 'utf8');
                 books = JSON.parse(books);
                 book.id = books.length + 1;
@@ -87,7 +88,7 @@ const writeFile = util.promisify(fs.writeFile);
             notes: 'Returns an array of books',
             tags: ['api'],
             handler: async (request, h) => {
-                const updBook = JSON.parse(request.payload);
+                let updBook = request.payload;
                 const id = request.params.id;
                 let books = await readFile('./books.json', 'utf8');
                 books = JSON.parse(books);
@@ -111,7 +112,7 @@ const writeFile = util.promisify(fs.writeFile);
             notes: 'Returns an array of books',
             tags: ['api'],
             handler: async (request, h) => {
-                const updBook = JSON.parse(request.payload);
+                let updBook = JSON.parse(request.payload);
                 const id = request.params.id;
                 let books = await readFile('./books.json', 'utf8');
                 books = JSON.parse(books);

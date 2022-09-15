@@ -14,7 +14,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "author": "Roman Akhromieiev",
+    "author": "Arnab",
     "title": "Hapi Ebook"
 }
 
@@ -24,11 +24,11 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "author": "Roman Akhromieiev",
+    "author": "Roman",
     "title": "Hapi Ebook"
 }
 
 ###
-DELETE http://localhost:3000/delete-book/4
+DELETE http://localhost:3000/delete-book/5
 Content-Type: application/json
 Accept: application/json
