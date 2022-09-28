@@ -5,10 +5,15 @@ const HapiSwagger = require('hapi-swagger');
 const Pack = require('./package');
 const fs = require('fs');
 const util = require('util');
-const Joi = require('@hapi/joi');
+const Joi = require('joi');
 
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
+
+const payload_scheme = Joi.object({
+    author: Joi.string().min(3).max(30).default('Rasel').required(),
+    title: Joi.string().min(3).max(30).default('Rasel').required(),
+});
 
 (async () => {
     const server = await new Hapi.Server({
@@ -18,10 +23,10 @@ const writeFile = util.promisify(fs.writeFile);
 
     const swaggerOptions = {
         info: {
-                title: 'Books API Documentation',
-                version: Pack.version,
-            },
-        };
+            title: 'Books API Documentation',
+            version: Pack.version,
+        },
+    };
 
     await server.register([
         Inert,
@@ -35,7 +40,7 @@ const writeFile = util.promisify(fs.writeFile);
     try {
         await server.start();
         console.log('Server running at:', server.info.uri);
-    } catch(err) {
+    } catch (err) {
         console.log(err);
     }
 
@@ -51,7 +56,7 @@ const writeFile = util.promisify(fs.writeFile);
         method: 'GET',
         path: '/book-list',
         options: {
-          description: 'Get book list',
+            description: 'Get book list',
             notes: 'Returns an array of books',
             tags: ['api'],
             handler: async (request, h) => {
@@ -68,18 +73,24 @@ const writeFile = util.promisify(fs.writeFile);
             description: 'Add new book in book-list',
             notes: 'Returns an array of books',
             tags: ['api'],
-            handler: async (request, h) => {
-                let book = request.payload;
-                let books = await readFile('./books.json', 'utf8');
-                books = JSON.parse(books);
-                book.id = books.length + 1;
-                books.push(book);
-                await writeFile('./books.json', JSON.stringify(books, null, 2), 'utf8');
-                return h.response(books).code(200);
-            }
+            validate: {
+                payload: payload_scheme,
+                failAction: async (request, h, err) => {
+                    return h.response({ code: 301, status: false, message: err?.message }).takeover();
+                },
+            },
+        },
+        handler: async (request, h) => {
+            let book = request.payload;
+            let books = await readFile('./books.json', 'utf8');
+            books = JSON.parse(books);
+            book.id = books.length + 1;
+            books.push(book);
+            await writeFile('./books.json', JSON.stringify(books, null, 2), 'utf8');
+            return h.response('books').code(200);
         }
     });
-    
+
     server.route({
         method: 'PUT',
         path: '/update-book-list/{id}',
@@ -103,7 +114,7 @@ const writeFile = util.promisify(fs.writeFile);
             }
         }
     });
-    
+
     server.route({
         method: 'DELETE',
         path: '/delete-book/{id}',
