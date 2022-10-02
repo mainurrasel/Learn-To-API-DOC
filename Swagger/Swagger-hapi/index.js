@@ -59,11 +59,11 @@ const payload_scheme = Joi.object({
             description: 'Get book list',
             notes: 'Returns an array of books',
             tags: ['api'],
-            handler: async (request, h) => {
-                let books = await readFile('./books.json', 'utf8');
-                return h.response(JSON.parse(books));
-            }
-        }
+        },
+        handler: async (request, h) => {
+            let books = await readFile('./books.json', 'utf8');
+            return h.response(JSON.parse(books));
+        },
     });
 
     server.route({
@@ -87,8 +87,8 @@ const payload_scheme = Joi.object({
             book.id = books.length + 1;
             books.push(book);
             await writeFile('./books.json', JSON.stringify(books, null, 2), 'utf8');
-            return h.response('books').code(200);
-        }
+            return h.response(books).code(200);
+        },
     });
 
     server.route({
@@ -98,21 +98,27 @@ const payload_scheme = Joi.object({
             description: 'Update book detail in book-list',
             notes: 'Returns an array of books',
             tags: ['api'],
-            handler: async (request, h) => {
-                let updBook = request.payload;
-                const id = request.params.id;
-                let books = await readFile('./books.json', 'utf8');
-                books = JSON.parse(books);
-                books.forEach((book) => {
-                    if (book.id == id) {
-                        book.title = updBook.title;
-                        book.author = updBook.author;
-                    }
-                });
-                await writeFile('./books.json', JSON.stringify(books, null, 2), 'utf8');
-                return h.response(books).code(200);
-            }
-        }
+            validate: {
+                payload: payload_scheme,
+                failAction: async (request, h, err) => {
+                    return h.response({ code: 301, status: false, message: err?.message }).takeover();
+                },
+            },
+        },
+        handler: async (request, h) => {
+            let updBook = request.payload;
+            const id = request.params.id;
+            let books = await readFile('./books.json', 'utf8');
+            books = JSON.parse(books);
+            books.forEach((book) => {
+                if (book.id == id) {
+                    book.title = updBook.title;
+                    book.author = updBook.author;
+                }
+            });
+            await writeFile('./books.json', JSON.stringify(books, null, 2), 'utf8');
+            return h.response(books).code(200);
+        },
     });
 
     server.route({
@@ -122,15 +128,15 @@ const payload_scheme = Joi.object({
             description: 'Delete book from book-list',
             notes: 'Returns an array of books',
             tags: ['api'],
-            handler: async (request, h) => {
-                let updBook = JSON.parse(request.payload);
-                const id = request.params.id;
-                let books = await readFile('./books.json', 'utf8');
-                books = JSON.parse(books);
-                books = books.filter(book => book.id != id);
-                await writeFile('./books.json', JSON.stringify(books, null, 2), 'utf8');
-                return h.response(books).code(200);
-            }
+        },
+        handler: async (request, h) => {
+            let updBook = JSON.parse(request.payload);
+            const id = request.params.id;
+            let books = await readFile('./books.json', 'utf8');
+            books = JSON.parse(books);
+            books = books.filter(book => book.id != id);
+            await writeFile('./books.json', JSON.stringify(books, null, 2), 'utf8');
+            return h.response(books).code(200);
         }
     });
 
