@@ -100,15 +100,10 @@ const payload_scheme = Joi.object({
             tags: ['api'],
             validate: {
                 params: Joi.object({
-                     id: Joi.string().min(3).max(30).default("1").required()
+                     id: Joi.string().required()
                  }),
+                 payload: payload_scheme,
              },
-            validate: {
-                payload: payload_scheme,
-                failAction: async (request, h, err) => {
-                    return h.response({ code: 301, status: false, message: err?.message }).takeover();
-                },
-            },
         },
         handler: async (request, h) => {
             let updBook = request.payload;
@@ -135,7 +130,7 @@ const payload_scheme = Joi.object({
             tags: ['api'],
             validate: {
                params: Joi.object({
-                    id: Joi.string().min(3).max(30).default("1").required()
+                    id: Joi.string().required()
                 }),
             },
         },
