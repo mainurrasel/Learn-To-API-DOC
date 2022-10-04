@@ -99,6 +99,11 @@ const payload_scheme = Joi.object({
             notes: 'Returns an array of books',
             tags: ['api'],
             validate: {
+                params: Joi.object({
+                     id: Joi.string().min(3).max(30).default("1").required()
+                 }),
+             },
+            validate: {
                 payload: payload_scheme,
                 failAction: async (request, h, err) => {
                     return h.response({ code: 301, status: false, message: err?.message }).takeover();
@@ -128,6 +133,11 @@ const payload_scheme = Joi.object({
             description: 'Delete book from book-list',
             notes: 'Returns an array of books',
             tags: ['api'],
+            validate: {
+               params: Joi.object({
+                    id: Joi.string().min(3).max(30).default("1").required()
+                }),
+            },
         },
         handler: async (request, h) => {
             let updBook = JSON.parse(request.payload);
