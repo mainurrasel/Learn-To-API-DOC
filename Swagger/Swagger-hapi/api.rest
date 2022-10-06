@@ -24,11 +24,11 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "author": "Roman",
+    "author": "Rasel",
     "title": "Hapi Ebook"
 }
 
 ###
-DELETE http://localhost:3000/delete-book/5
+DELETE http://localhost:3000/delete-book/4
 Content-Type: application/json
 Accept: application/json
