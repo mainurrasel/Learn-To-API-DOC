@@ -6,6 +6,8 @@ const Pack = require('./package');
 const fs = require('fs');
 const util = require('util');
 const Joi = require('joi');
+const _ = require("underscore");
+const Util = require("core-util-is");
 
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
@@ -19,25 +21,13 @@ const param_scheme = Joi.object({
     id: Joi.string().required()
 });
 
-const query_param_scheme = Joi.object({
-    id: Joi.string().required()
-});
-
-var responseModel = Joi.object({
-    author: Joi.string(),
-    title: Joi.string(),
-    id: Joi.string()
-}).meta({
-  className: 'Result'
-});
-
 (async () => {
     const server = await new Hapi.Server({
         host: 'localhost',
         port: 3000,
     });
 
-//specify our documentation and the version number
+    //specify our documentation and the version number
     const swaggerOptions = {
         info: {
             title: 'Books API Documentation',
@@ -45,7 +35,7 @@ var responseModel = Joi.object({
         },
     };
 
-//register (before the server starts) all plugins and Swagger configuration
+    //register (before the server starts) all plugins and Swagger configuration
     await server.register([
         Inert,
         Vision,
@@ -62,7 +52,7 @@ var responseModel = Joi.object({
         console.log(err);
     }
 
-//Adding description, tags, notes to API routes
+    //Adding description, tags, notes to API routes
     server.route({
         method: 'GET',
         path: '/',
@@ -71,7 +61,7 @@ var responseModel = Joi.object({
         }
     });
 
-//Adding description, tags, notes to API routes
+    //Adding description, tags, notes to API routes
     server.route({
         method: 'GET',
         path: '/book-list',
@@ -86,25 +76,70 @@ var responseModel = Joi.object({
         },
     });
 
-//Adding description, tags, notes to API routes with query param
+    //Adding description, tags, notes to API routes with path param
     server.route({
         method: 'GET',
-        path: '/book-list-query',
+        path: '/book-with-path-param/{id}',
         options: {
-            description: 'Get book list',
-            notes: 'Returns an array of books',
+            description: 'Get book list with path param',
+            notes: 'Returns an object of book',
             tags: ['api'],
             validate: {
-                query: query_param_scheme,
+                params: Joi.object({
+                    id: Joi.number(),
+                }),
+                failAction: async (request, h, err) => {
+                    return h.response({ code: 301, status: false, message: err?.message }).takeover();
+                },
             },
         },
         handler: async (request, h) => {
             let books = await readFile('./books.json', 'utf8');
-            return h.response(JSON.parse(books));
+            let findbook = null;
+            findbook = _.findWhere(JSON.parse(books), { id: request.params.id })
+            return `${(JSON.stringify(findbook))}`;
         },
     });
 
-//Adding description, tags, notes to API routes
+    //Adding description, tags, notes to API routes with query param
+    server.route({
+        method: 'GET',
+        path: '/book-with-query-param',
+        options: {
+            description: 'Get book list with query path param',
+            notes: 'Returns an object of book',
+            tags: ['api'],
+            validate: {
+                query: Joi.object({
+                    id: Joi.number(),
+                    author: Joi.string(),
+                    title: Joi.string(),
+                }),
+                failAction: async (request, h, err) => {
+                    return h.response({ code: 301, status: false, message: err?.message }).takeover();
+                },
+            },
+        },
+        handler: async (request, h) => {
+            let books = await readFile('./books.json', 'utf8');
+            let findbook = null;
+            let param = {};
+
+            if (request.query.id) {
+                param = _.extend(param, { id: request.query.id })
+            }
+            if (request.query.author) {
+                param = _.extend(param, { author: request.query.author })
+            }
+            if (request.query.title) {
+                param = _.extend(param, { title: request.query.title })
+            }
+            findbook = _.where(JSON.parse(books), param)
+            return `${(JSON.stringify(findbook))}`;
+        },
+    });
+
+    //Adding description, tags, notes to API routes
     server.route({
         method: 'POST',
         path: '/add-book',
@@ -118,7 +153,6 @@ var responseModel = Joi.object({
                     return h.response({ code: 301, status: false, message: err?.message }).takeover();
                 },
             },
-            // response: {schema: responseModel}
         },
         handler: async (request, h) => {
             let book = request.payload;
@@ -131,7 +165,7 @@ var responseModel = Joi.object({
         },
     });
 
-//Adding description, tags, notes to API routes
+    //Adding description, tags, notes to API routes
     server.route({
         method: 'PUT',
         path: '/update-book-list/{id}',
@@ -160,7 +194,7 @@ var responseModel = Joi.object({
         },
     });
 
-//Adding description, tags, notes to API routes
+    //Adding description, tags, notes to API routes
     server.route({
         method: 'DELETE',
         path: '/delete-book/{id}',

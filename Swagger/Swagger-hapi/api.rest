@@ -9,6 +9,16 @@ Content-Type: application/json
 Accept: application/json
 
 ###
+GET http://localhost:3000/book-with-path-param/4
+Content-Type: application/json
+Accept: application/json
+
+###
+GET http://localhost:3000/book-with-query-param?title=string
+Content-Type: application/json
+Accept: application/json
+
+###
 POST http://localhost:3000/add-book
 Content-Type: application/json
 Accept: application/json

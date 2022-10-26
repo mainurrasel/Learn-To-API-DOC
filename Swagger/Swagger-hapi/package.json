@@ -13,11 +13,14 @@
     "@hapi/inert": "^7.0.0",
     "@hapi/joi": "^15.0.3",
     "@hapi/vision": "^7.0.0",
+    "core-util-is": "^1.0.3",
     "fs": "0.0.1-security",
     "hapi": "^17.8.5",
     "inert": "^2.0.0",
     "joi": "^17.6.0",
+    "underscore": "^1.13.6",
     "util": "^0.12.4",
+    "utils": "^0.3.1",
     "vision": "^5.4.4"
   },
   "devDependencies": {
